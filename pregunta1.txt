@@ -1,0 +1,943 @@
+Seguridad
+Los lectores de esta guía saben cómo de extendidos están
+los smartphones y cómo de útiles pueden ser las aplicaciones
+móviles. Los dispositivos móviles son además mucho más personales de lo que jamás lo han sido los ordenadores. La gente
+se despierta con sus teléfonos, permanecen cerca de ellos todo
+el día y duermen a su lado por las noches. Con el tiempo se
+convierten en nuestros ‘colaboradores’ de confianza.
+Muchas de estas aplicaciones aprovechan esta cercanía y
+confianza. Por ejemplo, tu teléfono puede ser tratado como
+un eslabón en el proceso de autenticación para acceder a tu
+cuenta bancaria. O tu tableta puede tener acceso directo a
+las películas en línea que has comprado. Tu dispositivo podría
+incluso contener una cartera con dinero real para realizar pagos
+mediante tecnología NFC o con dinero virtual como bitcoins.
+Las aplicaciones móviles están atrayendo la atención de
+hackers y ladrones cuyos intereses se extienden mucho más
+allá de conseguir gratis una aplicación de 99 céntimos. En
+el tercer trimestre del 2015 Kaspersky Lab detectó 323.374
+nuevos programas móviles maliciosos1. Las clásicas defensas
+de red y de punto final (como los antivirus) no son suficientes.
+Incorporar medidas de seguridad en las aplicaciones móviles es
+un tema crítico.
+La arquitectura de las aplicaciones móviles sigue evolucionando. Algunas aplicaciones son solo nativas y requieren de
+bases de código muy diferentes para cada sistema operativo
+móvil. Algunas son webviews, poco más que la URL de un sitio
+web envuelta en un icono. Otras son híbridas, una combinación
+1 securelist.com/analysis/quarterly-malware-reports/72493/it-threatevolution-in-q3-2015
+BY Dean Churchill
+Seguridad 183
+de funcionalidad de aplicación nativa con webviews. La mayoría
+de aplicaciones móviles necesitan conectarse con los servicios
+de back-end utilizando tecnologías web para recibir o actualizar información. Como ocurre con las aplicaciones web, la
+seguridad para aplicaciones clásica debe ser aplicada a las aplicaciones móviles. La entrada de datos debe ser validada en lo
+que se refiere a tamaño, tipos y valores permitidos. El manejo
+de errores debe proporcionar mensajes de error útiles para los
+usuarios a la vez que evite el filtrado de información sensible.
+Las pruebas de penetración en aplicaciones son necesarias para
+asegurarse de que los controles de identificación, autenticación
+y autorización no pueden ser superados. El almacenamiento en
+los dispositivos debe ser inspeccionado y probado para asegurar
+que los datos sensibles y las claves de cifrado no se almacenan
+en texto plano. Los archivos de registro no deben capturar
+contraseñas u otra información sensible. La configuración SSL
+debe ser probada.
+Los usuarios desean utilizar tus aplicaciones de forma segura
+y no quieren sorpresas desagradables. Su dispositivo móvil
+puede exponerlos a mayores vulnerabilidades, por ejemplo su
+ubicación podría ser rastreada utilizando el GPS incorporado,
+la cámara y el micrófono podrían ser utilizados para capturar
+información que preferirían mantener privada, y así sucesivamente. Las aplicaciones también se pueden crear para acceder
+a información confidencial como la agenda de contactos. Y
+aplicaciones maliciosas pueden hacer llamadas telefónicas
+de manera encubierta y enviar mensajes SMS a números de
+tarificación adicional.
+El desarrollador de la aplicación puede estar preocupado
+por su reputación, pérdida de ingresos o perdida de la propiedad intelectual. Las empresas quieren proteger los datos
+empresariales a los que los usuarios pueden acceder desde sus
+dispositivos, posiblemente utilizando tu aplicación. ¿Es posible
+Seguridad 184
+mantener sus datos separados y protegidos de cualquier otra
+cosa que el usuario haya instalado?
+Amenazas para tus Aplicaciones
+En algunas plataformas (iOS y Android en particular),
+desactivar la verificación de firmas es una práctica bastante
+común. Tienes que considerar si para ti es importante o no
+el que alguien pueda modificar tu código y ejecutarlo en un
+dispositivo jailbreakeado o rooteado. Un preocupación evidente
+sería la eliminación de una verificación de licencia, lo que
+podría dar lugar a que tu aplicación sea robada y utilizada de
+forma gratuita. Menos evidente, pero más grave, es la amenaza
+de inserción de código malintencionado (malware) que pueda
+robar información de tus usuarios o inyectar contenido ilícito y
+destruir la reputación de tu marca.
+La ingeniería inversa sobre tu aplicación puede dar a un
+hacker el acceso a una gran cantidad de datos sensibles, como
+las claves de cifrado para películas protegidas con DRM, el
+protocolo secreto para hablar con tu servidor de juegos online
+o la manera de acceder a dinero almacenado en el teléfono
+para tu sistema de pago móvil. Solamente hace falta un hacker
+y un teléfono jailbreakeado para explotar cualquiera de estas
+amenazas.
+Si tu aplicación maneja dinero real o contenido valioso es
+necesario tomar todas las medidas posibles para protegerla
+de ataques Man-At-The-End (o MATE, en los que el atacante
+tiene acceso físico al dispositivo). Y si estás implementando
+un estándar DRM, tendrás que seguir las reglas de robustez que
+hacen obligatorias las medidas de auto-protección.
+Seguridad 185
+Protegiendo tu Aplicación
+Escondiendo el Plano de tu Código
+Algunas plataformas móviles se programan utilizando código
+administrado (Java o .NET), integrado por código de bytes
+ejecutado por una máquina virtual en lugar de hacerlo directamente en la CPU. Los formatos binarios para estas plataformas
+incluyen metadatos que establecen la jerarquía de clases y dan
+el nombre y tipo de cada clase, variable, método y parámetro.
+Los metadatos ayudan a la máquina virtual a implementar
+algunas de las características del lenguaje (por ejemplo la
+reflexión). Sin embargo, los metadatos también son muy útiles
+para un hacker que esté tratando de realizar ingeniería inversa
+del código. Hay programas de decompilación de libre acceso
+que regeneran el código fuente a partir de los códigos de bytes
+y hacen fácil la ingeniería inversa.
+La plataforma Android tiene la opción de usar la Interfaz
+Nativa Java (JNI, del inglés Java Native Interface) para acceder
+a funciones escritas en C y compiladas en código nativo. El
+código nativo es mucho más difícil que sea objeto de ingeniería
+inversa en comparación con Java, por lo que se recomienda
+para cualquier parte de la aplicación donde la seguridad sea de
+suma importancia.
+“gcc” es el compilador utilizado normalmente para generar
+código nativo para Android, mientras que su gemelo “clang” se
+utiliza para iOS. La configuración predeterminada para estos
+compiladores prepara cada función para ser exportada desde un
+objeto compartido y la agrega a la tabla de símbolos dinámicos
+en el binario. La tabla dinámica de símbolos es diferente de la
+tabla de símbolos utilizada para la depuración y es mucho más
+difícil de desmantelar después de la compilación. El volcado de
+los símbolos dinámicos puede dar a un hacker un índice muy
+útil de cada función en el código nativo. Utilizar correctamente
+Seguridad 186
+el –f visibility conmutador del compilador2 es una manera
+fácil de hacer que sea más complicado comprender el código.
+El código Objective-C compilado contiene código máquina
+y una gran cantidad de metadatos que pueden proveer a un
+atacante de información sobre nombres y la estructura de
+llamadas de la aplicación. Actualmente existen herramientas
+y scripts para leer estos metadatos y guiar a los hackers, pero
+no hay herramientas para ocultarlos. La manera más común de
+construir una interfaz gráfica para iOS es utilizando ObjectiveC, pero el método más seguro consiste en minimizar su uso y
+cambiar a C o C++ para todo lo que no sea la interfaz gráfica de
+usuario.
+Escondiendo el Control de Flujo
+Incluso si todos los nombres están ocultos, un hacker bueno
+todavía puede averiguar cómo funciona el software. Hay
+herramientas comerciales de protección de código administrado
+que pueden ocultar deliberadamente el camino a través del
+código recodificando las operaciones y rompiendo los bloques
+de instrucciones, lo que hace la decompilación mucho más
+difícil. Con una buena herramienta de protección, un intento de
+decompilar un binario protegido terminará o bien en un fallo
+del decompilador o en un código fuente no válido.
+Decompilar código nativo es mucho más difícil, pero se
+puede conseguir. Incluso sin una herramienta, no se necesita
+mucha práctica para ser capaz de seguir el control de flujo
+en el código ensamblador generado por un compilador. Las
+aplicaciones con un fuerte requisito de seguridad necesitarán
+una herramienta de ofuscación para el código nativo, así como
+para el código administrado.
+2 http://gcc.gnu.org/wiki/Visibility
+Seguridad 187
+Protegiendo las Comunicaciones de Red
+Las comunicaciones de red son vulnerables a los ataques
+basados en fisgonear y en inyección. Las aplicaciones pueden
+ser instaladas e inspeccionadas en emuladores o simuladores.
+Los analizadores de red están disponibles gratuitamente y
+son capaces de monitorear, interceptar, cambiar y redirigir el
+tráfico de red. Algunos gobiernos vigilan las comunicaciones
+electrónicas para los temas censurados. Protege todas las
+comunicaciones utilizando HTTPS en lugar de HTTP. Las
+descargas de librerías JavaScript de sitios públicos deberían
+utilizar HTTPS, ya que los hackers usando ataques MATE pueden
+inyectar código malicioso en la descarga si se utiliza HTTP.
+Las descargas de contenido estático, como imágenes, de sitios
+públicos, deberían utilizar también HTTPS, ya que los hackers
+podrían sustituir las imágenes por contenido malicioso. Una
+forma de incrementar la seguridad del transporte es utilizar
+el cifrado asimétrico entre el servidor y la aplicación móvil
+(usando pares de claves públicas/privadas) para proporcionar
+seguridad de extremo a extremo. Las aplicaciones móviles
+deben validar que el nombre de servidor o el nombre común
+del servidor HTTPS al que se conectan es el correcto y el que se
+espera. Para las aplicaciones y los datos corporativos sensibles,
+instala servidores de red privada virtual (VPN), e instala
+los clientes VPN en los dispositivos móviles. Las redes VPN
+generalmente proporciona autenticación fuerte y un transporte
+seguro más allá de HTTPS.
+Seguridad 188
+Protegerse contra la Manipulación de Datos (Tampering)
+Puedes proteger el código base aún más detectando los
+intentos de manipulación en la aplicación y respondiendo a
+esos ataques. El código criptográfico siempre debe utilizar
+algoritmos de cifrado estándar relativamente seguros (como
+AES o ECC) pero, ¿qué pasa si un atacante puede encontrar las
+claves de cifrado en tu archivo binario o en memoria en tiempo
+de ejecución? Esto podría resultar en que el atacante tenga
+acceso a contenido valioso. Incluso si utilizas criptografía de
+clave pública y solo se expone una parte del par de claves,
+todavía tienes que considerar lo que ocurriría si un atacante
+intercambiara esa clave por otra de la que él conociera la otra
+mitad. Necesitas una técnica para detectar cuándo el código ha
+sido manipulado. Hay herramientas disponibles que encriptan/
+desencriptan código sobre la marcha, llevan a cabo sumas de
+verificación contra el código para detectar su manipulación, y
+reaccionan cuando el código ha cambiado.
+Las comunicaciones entre la aplicación móvil y los servicios
+de backend pueden ser monitorizadas y pirateadas. Incluso
+cuando se utiliza HTTPS, un proxy web interceptor (como
+Paros) puede ser configurado en una conexión WiFi para
+que inspeccione el tráfico encriptado. Los atacantes pueden
+entonces manipular los datos en tránsito, con fines de lucro o
+entretenimiento. Así que, si se están enviando datos realmente
+sensibles a través de HTTPS, considera encriptar/desencriptar
+datos en la aplicación móvil y en el servidor, de modo que los
+rastreadores de red solamente puedan ver datos cifrados.
+Protegiendo Algoritmos Criptográficos
+Una herramienta activa contra la manipulación puede ayudar
+a detectar o prevenir algunos ataques a claves criptográficas,
+pero no permitirá que las claves permanezcan siempre ocultas.
+La criptografía de caja blanca tiene por objeto aplicar los
+algoritmos de cifrado estándar de manera que las claves
+permanezcan ocultas. Algunas versiones de criptografía de
+caja blanca utilizan complejos enfoques matemáticos para
+obtener los mismos resultados numéricos de tal manera que sea
+difícil de deducir por ingeniería inversa. Otras insertan claves
+en tablas de consulta y máquinas de estados que es difícil
+que sean objeto de ingeniería inversa. La criptografía de caja
+blanca sin duda te será necesaria si vas a escribir código DRM o
+necesitas almacenamiento de datos de alta seguridad.
+Mejores Prácticas
+No Almacenes Secretos o Información Privada
+Minimiza la cantidad de información sensible almacenada en
+el dispositivo. No almacenes credenciales o claves de cifrado,
+a menos que se utilice un almacenamiento seguro protegido
+por una contraseña compleja. En su lugar, guarda tokens de
+autenticación que tengan tiempo de vida y funcionalidad
+limitados.
+Los archivos de registro son útiles para diagnosticar
+errores en el sistema y hacer un seguimiento del uso de las
+aplicaciones. Pero asegúrate de no violar la privacidad de
+los usuarios mediante el almacenamiento de información de
+ubicación o registrando información personalmente identificable de los mismos. Algunos países tienen leyes que restringen
+la información de seguimiento que se puede recopilar, así que
+asegúrate de comprobar las leyes al respecto de los países en
+los que tu aplicación será utilizada.
+No imprimas seguimientos de pila ni diagnósticos de
+sistema que un hacker pueda aprovechar para penetrar a mayor
+profundidad.
+Seguridad 190
+No Confíes en el Dispositivo
+Cuando diseñes una aplicación, supón que el dispositivo estará
+en manos de un atacante tratando de abusar de la aplicación.
+Realiza el mismo ciclo de desarrollo de software seguro en la
+creación de aplicaciones móviles que el que emplearías con los
+servicios de backend. No confíes ni siquiera en las bases de
+datos que crees para tus aplicaciones móviles, un hacker puede
+cambiar su esquema. No confíes en el sistema operativo para
+obtener protección, la mayoría de esas protecciones pueden ser
+anuladas de manera trivial mediante un jailbreak al dispositivo.
+No confíes en que los almacenes nativos de claves mantendrán
+los datos protegidos, se puede irrumpir en algunos almacenes
+de claves por fuerza bruta, a menos que el usuario proteja el
+dispositivo con una contraseña compleja y larga.
+Minimiza los Permisos
+Android tiene el concepto de permisos, mientras que iOS tiene
+derechos. Ambos permiten el acceso de las aplicaciones a
+sensores tales como el GPS y contenido sensible. En Android
+estos permisos deben ser especificados como parte de la
+creación de la aplicación, en el archivo AndroidManifest.xml y
+se le muestran al usuario cuando opta por instalar la aplicación
+en su dispositivo.
+Cada permiso aumenta el potencial de que tu aplicación
+haga cosas nefastas, y eso puede disuadir a algunos usuarios
+incluso de descargar la aplicación. Así que intenta minimizar
+el número de permisos o de características que tu aplicación
+necesita.
+191
+Herramientas
+Protección
+Un renombrado básico de código Java puede ser realizado
+mediante Proguard3, una herramienta de código abierto, y
+Arxan’s GuardIT4.
+Dos comercializadores de herramientas de protección de
+código gestionado (Java y .NET) son Arxan Technologies5 y
+PreEmptive Solutions6.
+Los principales vendedores de herramientas de protección
+de código nativo y librerías de criptografía de caja blanca son
+Arxan and Irdeto7.
+Los principales vendedores de herramientas de escaneo de
+código fuente móvil seguro son Checkmarx8 y HP9.
+Las técnicas para proteger el código Android frente a manipulación de datos están documentadas en androidcracking.
+blogspot.com/. EnsureIT de Arxan te permite insertar código
+adicional en tiempo de compilación para detectar depuradores,
+usar sumas de validación para detectar cambios del código
+en memoria y permitir al código ser desencriptado o reparado
+sobre la marcha.
+3 www.proguard.sourceforge.net
+4 arxan.com
+5 arxan.com
+6 preemptive.com
+7 www.irdeto.com
+8 checkmarx.com
+9 www8.hp.com/us/en/software-solutions/mobile-app-security/index.html
+Seguridad 192
+Sniffing
+Una herramienta web proxy estándar es Paros10. Una herramienta estándar para sniffing de red disponible en las plataformas
+habituales es Wireshark11.
+Decompilando
+Visita el decompilador Hex Rays12.
+Aprender Más
+A continuación, algunos recursos y referencias útiles que
+pueden ayudarte:
+— Apple ofrece una guía general de seguridad de software13.
+También incluye múltiples enlaces a temas más detallados
+de su plataforma.
+— Existen cursos comerciales para iOS y Android. Lancelot
+Institute14 ofrece cursos de programación segura que
+cubren iOS y Android.
+— Un probador gratuito para SSL se puede encontrar en
+Qualsys Labs15.
+— Extensas guías de aplicaciones seguras y herramientas de
+testeo gratuitas son ofrecidas por OWASP16, incluyendo el
+OWASP Mobile Security Project17.
+10 sourceforge.net/projects/paros
+11 sourceforge.net/projects/wireshark
+12 www.hex-rays.com
+13 developer.apple.com/library/mac/navigation/#section=Topics&topic=Security
+14 www.lancelotinstitute.com
+15 www.ssllabs.com/ssltest
+16 www.owasp.org
+17 www.owasp.org/index.php/OWASP_Mobile_Security_Project
+Seguridad 193
+— Una opción libre para la monitorización de rendimiento
+para iOS y Android es la herramienta AT&T Application
+Resource Optimisation18.
+Conclusiones
+Cada vez hay mayor confianza en las aplicaciones móviles, pero
+estas están expuestas a mucha gente que quisiera aprovecharse
+de tal confianza. El nivel adecuado de seguridad de una
+aplicación es algo que debe considerarse para cada caso en
+particular. Al final, tu aplicación va a estar ahí fuera, sola ante
+el peligro, y tendrá que defenderse de los piratas informáticos y
+otras amenazas maliciosas donde quiera que vaya.
+Invierte tiempo en aprender acerca de las características y
+capacidades de seguridad de las plataformas móviles que tienes
+como objetivo. Utiliza técnicas como el modelado de amenazas
+para identificar los peligros potenciales relacionados con tu
+aplicación. Realiza revisiones de código y elimina métodos no
+esenciales de registro y depuración. Ejecuta una herramienta
+de análisis de código seguro contra el código de tu aplicación
+móvil para encontrar vulnerabilidades. Considera cómo un
+hacker podría analizar tu código y, a continuación, utiliza
+técnicas similares contra la aplicación en un entorno seguro
+para descubrir vulnerabilidades y mitigarlas antes de publicar
+tu aplicación.
+18 developer.att.com/application-resource-optimizer
+194 Seguridad
+Accesibilidad 195
+Accesibilidad
+Por Qué Es Importante la Accesibilidad
+En diciembre del 2015, la Organización Mundial de la Salud
+(OMS) declaró en su página web que más del 15% de la
+población mundial tiene algún tipo de discapacidad1 y las tasas
+de discapacidad están aumentando debido al envejecimiento
+de la población y al aumento de las condiciones de salud
+crónicas, entre otras causas. Esto significa que alrededor de mil
+millones de usuarios potenciales podrían tener dificultades para
+la utilización de tu aplicación en caso de que no sea accesible.
+Ha habido un gran aumento en el uso de teléfonos inteligentes y tablets en la población en general, y esto incluye a
+las personas con discapacidad. La encuesta WebAIM Screen
+Reader2 muestra que ha habido un aumento sorprendente en
+el uso de teléfonos inteligentes por parte de personas ciegas
+que usan lectores de pantalla. Las personas mayores pueden
+no haber utilizado un ordenador en el trabajo, pero están
+descubriendo que pueden llegar a acomodarse a dispositivos
+de pantalla táctil más rápidamente que a un teclado y un
+ratón tradicionales. A medida que nuestra población envejece,
+también lo hacen los niveles de discapacidad y esto significa
+que más y más personas tendrán dificultades para acceder a los
+servicios de la manera tradicional. Proporcionar una solución
+digital accesible alternativa garantizará que las personas con
+discapacidad puedan seguir siendo independientes. Por ejemplo, si no son capaces de salir de casa para hacer sus compras
+1 www.who.int/mediacentre/factsheets/fs352/en
+2 webaim.org/projects/screenreadersurvey6/
+BY Sally Cain
+Accesibilidad 196
+o gestionar su cuentas bancarias, la prestación de servicios
+en línea accesibles significará que pueden acceder a estos
+servicios de forma independiente. Es importante reconocer la
+importancia que tiene un acceso independiente a los servicios
+para las personas con discapacidad.
+Hay muchas otras razones para hacer tu aplicación accesible:
+— Implementar la accesibilidad a menudo mejora la usabilidad general. Por ejemplo, si te aseguras de que cada botón
+y elemento en un formulario tenga una etiqueta adecuada,
+esto resulta útil para todos, no solo para los que tienen
+discapacidades, ya que todos los usuarios sabrán cómo
+interactuar con él. Añadir accesibilidad en tus aplicaciones
+asegura una excelente experiencia de usuario para todos.
+— Simplemente es un buen negocio. Por ejemplo, las
+personas con discapacidad tienen poder adquisitivo y si
+encuentran una aplicación accesible que funciona para
+ellos no solo la utilizarán sino que también se lo dirán a
+otros. Puedes descubrir un nuevo mercado significativo
+cuando desarrolles aplicaciones que funcionen para estos
+usuarios.
+— El acceso a los bienes y servicios para todos viene fijado
+por ley en muchos países. Por ejemplo en el Reino Unido
+la Ley de Igualdad del 2010 exige que haya acceso a
+los bienes y servicios para todo el mundo y esto incluye
+los servicios que se proporcionan a través de un medio
+electrónico como los sitios web y aplicaciones. Los
+organismos públicos también tienen el deber de anticiparse
+para asegurar que sus servicios sean accesibles, para que
+no puedan considerar la accesibilidad como una ocurrencia
+tardía.
+— En escenarios donde las soluciones accesibles son
+legalmente obligatorias, tu aplicación puede ser la única
+opción para que un negocio pueda operar. Por ejemplo,
+tu aplicación puede ser capaz de aprovechar sectores
+del mercado financiados por el gobierno tales como la
+educación, donde legislación como la Section 508 of the
+Rehabilitation Act en los Estados Unidos puede exigir una
+solución accesible.
+— La organización para la que está siendo desarrollada la
+aplicación puede tener un programa de responsabilidad
+social corporativa. Por ejemplo, la accesibilidad en webs
+y aplicaciones ayuda a la inclusión social de las personas
+con discapacidad, que es un aspecto fundamental de la
+responsabilidad social corporativa.
+— Las plataformas móviles de Apple, Google y Microsoft
+aprovechan sus APIs de accesibilidad para las pruebas
+automatizadas de la interfaz de usuario. La creación de una
+aplicación accesible puede hacer tus pruebas automatizadas más fáciles.
+¿Qué Funciones de Accesibilidad?
+De entre tus usuarios potenciales, muchos pueden tener una
+discapacidad y esto puede hacer que sea más difícil para ellos
+usar un teléfono móvil y sus aplicaciones. Las discapacidades
+pueden incluir varios niveles de pérdida de visión o audición,
+discapacidades mentales o dificultades de aprendizaje, discapacidades físicas, problemas de destreza, y así sucesivamente.
+Muchos de estos usuarios confían en software de terceros
+para ayudarles a utilizar su dispositivo. A este software se le
+suele conocer como tecnología de asistencia e incluye diversas
+utilidades en función del tipo de discapacidad. Tradicionalmente este tipo de software o utilidades se han tenido que
+'añadir' a un dispositivo principal, a menudo a un alto precio,
+con el fin de hacerlo accesible o más fácil de usar para una
+persona con una discapacidad. Algunos teléfonos inteligentes y
+tablets proporcionan ahora suficientes tecnologías de asistencia
+incorporadas en el sistema operativo para que algunos usuarios
+con discapacidad puedan utilizar los dispositivos sin necesidad
+de pagar por tecnología de asistencia adicional. Lo que se ofrece
+depende de la plataforma y la versión del sistema operativo. Sin
+embargo para que estas características funcionen es necesario
+que la aplicación se haya diseñado e implementado para
+soportarlas.
+— Usuarios con visión parcial - Alguien que es parcialmente
+ciego se beneficia de la opción de cambiar el tamaño de
+fuente, el estilo de fuente y el uso de la negrita y el contraste de color. iOS, Android, BlackBerry y Windows ofrecen
+varias opciones para cambiar estos puntos en los ajustes.
+Además del clásico 'pellizca para ampliar', iOS, Android,
+BlackBerry y Windows ofrecen una función de ampliación
+o zoom que amplía una sección de la pantalla y mantiene
+este nivel de aumento al moverse por todo el teléfono. Esta
+función tiene asociados algunos gestos únicos.
+— Usuarios ciegos - Alguien que es ciego necesita que la
+información de la pantalla y la navegación por la pantalla
+se le anuncie a través de una locución sintetizada. A
+esto se le llama a menudo 'lector de pantalla'. iOS fue el
+primer sistema operativo que ofreció un lector de pantalla
+incorporado llamado 'VoiceOver'. Android incluye 'Talkback'
+(con todas las funciones desde Android 4.1 Jelly Bean), que
+está ganando popularidad en la comunidad de invidentes ya
+que está mejorando constantemente. Windows sacó el lector
+de pantalla Narrator en Windows Phone 8.1, pero actualmente no está en un punto en el que se pueda utilizar para
+tener acceso completo al teléfono si eres un usuario ciego.
+Accesibilidad 199
+BlackBerry ofrece un lector de pantalla con funcionalidad
+limitada en unos pocos dispositivos.
+— Usuarios con pérdida auditiva - Una persona con una
+discapacidad auditiva a menudo hará uso de un teléfono
+inteligente que sea compatible con audífonos y que ofrezca
+funciones como hace iOS con los parpadeos LED de alerta o la
+cancelación de ruido. También hay opciones de configuración
+en iOS y Android para activar los subtítulos y la ayuda en
+pantalla. Hacer uso de la vibración para las alertas también
+es útil. Algunos teléfonos también proporcionan soporte para
+audífonos y dispositivos TTY. Un dispositivo TTY permite a las
+personas con pérdida auditiva o con limitaciones del habla
+escribir mensajes a cualquier otra persona que tenga un TTY,
+usando una línea telefónica.
+— Usuarios con discapacidades físicas - Si un usuario tiene un
+impedimento motor es posible que esté usando un producto
+de hardware para acceder al teléfono, como por ejemplo un
+interruptor en tanto que algunos dispositivos lo soportan. Alternativamente, podría estar haciendo uso del reconocimiento
+de voz para acceder al dispositivo.
+— Usuarios con dificultades de aprendizaje - Si un usuario
+tiene un deterioro cognitivo o dificultad de aprendizaje,
+dependiendo de en qué consista la discapacidad puede hacer
+uso de la configuración que utilizaría un usuario con deficiencia visual. Especialmente aspectos como las opciones de color.
+Otros usuarios pueden hacer un mayor uso del reconocimiento
+de voz.
+Las personas con discapacidad ven su experiencia global
+afectada por lo bien que funciona una aplicación con la tecnología
+de asistencia. A medida que estas características están integradas
+en el sistema operativo y se pueden activar en la configuración, es
+Accesibilidad 200
+importante que como desarrollador tengas en cuenta que se puedan
+usar con tu aplicación y te asegures de testearlo.
+Como los lectores de pantalla y la ampliación de pantalla en el
+sistema operativo hacen uso de sus propios gestos, los gestos en tu
+aplicación pueden verse afectados cuando los lectores de pantalla
+o la ampliación están habilitados. Por ejemplo, un usuario de lector
+de pantalla puede navegar por una pantalla deslizando el dedo a
+izquierda y derecha o explorar la pantalla moviendo su dedo por
+la superficie del dispositivo en un movimiento constante. Según
+va deslizando el dedo y se encuentran algo debajo, se anuncia un
+elemento. Y ese elemento se puede seleccionar pulsando una vez
+y abrir tocando dos veces. Al utilizar la magnificación de pantalla,
+dependiendo del sistema operativo, es posible que necesite usar un
+gesto de tres dedos. Incluir las pruebas con funciones de accesibilidad desde el principio asegura que estos gestos son soportados por
+la aplicación y que cualquier rediseño puede realizarse sin impacto
+para los usuarios.
+Una de las mejores maneras de aprender más acerca de estas
+características es activarlas y probarlas por ti mismo en diferentes
+aplicaciones.
+Directrices en el Diseño de Aplicaciones
+Las APIs de accesibilidad buscan textos en unos atributos específicos de elementos estándares de la interfaz de usuario. Los lectores
+de pantalla utilizados por personas invidentes, como VoiceOver y
+TalkBack, transforman estos textos en voz sintética que el usuario
+escucha. El software lector de pantalla también puede determinar
+el tipo de control y atributos relacionados para facilitarle al usuario
+más información contextual, sobre todo si no hay texto disponible.
+Es importante que el usuario entienda qué es la etiqueta del control, qué es el control y cómo interactuar con él. En algunos casos
+Accesibilidad 201
+puede haber otras etiquetas secundarias para aportar información
+adicional.
+Del mismo modo que los desarrolladores web hacen uso de
+estándares y directrices tales como las WCAG 2.0 para hacer páginas
+web accesibles, es importante que los desarrolladores de aplicaciones hagan lo mismo. Actualmente no existe un estándar de facto
+de la industria para accesibilidad en aplicaciones, aunque sí que
+existen varios estándares que pueden ser de utilidad.
+El estándar internacional, ISO 9241-171 ('The Ergonomics of
+Human-system Interaction: Guidance on Software Accessibility')3 es
+un estándar útil, ya que es independiente de la plataforma. Cubre
+los elementos de accesibilidad y usabilidad para una amplia gama
+de software.
+El Royal National Institute of Blind People (RNIB)4 ha creado
+un estándar de aplicaciones y proceso de pruebas para todo tipo
+de discapacidades basado en su experiencia en este ámbito. Su
+estándar para aplicaciones nativas refleja también los principios
+de la norma ISO 9241-171. También ofrecen asesoría y formación
+a organizaciones y agencias en esta área y gestionan una acreditación que se puede conceder a las aplicaciones que se consideran
+accesibles tras un proceso de auditoría.
+La BBC ha desarrollado un conjunto de Directrices de Accesibilidad para móviles5 que utilizan internamente para su contenido
+móvil. Su guía cubre sitios web móviles y aplicaciones nativas y
+híbridas. Afirman que "han de considerarse como un estándar para
+los empleados y los proveedores de la BBC, aunque también pueden
+ser referencia para cualquier persona involucrada en desarrollo
+móvil".
+A continuación se exponen algunos de los principios a tener en
+3 www.iso.org/iso/iso_catalogue/catalogue_tc/catalogue_detail.
+htm?csnumber=39080
+4 rnib-business.org.uk
+5 www.bbc.co.uk/guidelines/futuremedia/accessibility/mobile_access.shtml
+Accesibilidad 202
+cuenta a la hora de desarrollar una aplicación. Si te adhieres a
+ellos, también le darás a tu aplicación las mejores opciones para
+interactuar con la tecnología de asistencia que el usuario pueda
+estar ejecutando en conjunción con tu software:
+APIs y Directrices para Interfaces de Usuario
+— Averigua qué características de accesibilidad y APIs tiene
+tu plataforma y sigue las mejores prácticas en el aprovechamiento de esas APIs si existen.
+— Usa elementos estándares de interfaz de usuario en lugar de
+elementos personalizados cuando sea posible. Esto asegurará que si tu plataforma cuenta con una infraestructura de
+accesibilidad, o adquiere una en el futuro, probablemente tu
+aplicación se mostrará como accesible para tus usuarios.
+— Utiliza la API de accesibilidad para tu plataforma, si la hay.
+Esto te permitirá hacer los elementos de interfaz de usuario
+personalizados más accesibles y significará menos trabajo
+por tu parte.
+— Sigue las directrices de interfaz de usuario estándares en tu
+plataforma. Esto mejora la consistencia y puede significar un
+diseño más accesible por defecto.
+— El usuario debe ser capaz de aplicar los ajustes de preferencias que el sistema operativo proporciona, tales como la
+configuración de accesibilidad.
+Navegación
+— La navegación debe ser lógica y coherente. Por ejemplo, si
+en cada pantalla existe un botón para ir atrás debe estar
+ubicado en el mismo lugar en todas las pantallas y ser
+etiquetado de forma consistente.
+Accesibilidad 203
+— Permite la navegación programática de tu interfaz de usuario.
+Esto no solo permitirá que tus aplicaciones se utilicen con un
+teclado externo, sino que también mejorará la accesibilidad
+de tu aplicación en plataformas como Android en la que la
+navegación se puede realizar con un trackball o un d-pad
+virtual.
+Elementos de Usuario
+— Todos los elementos de usuario deben ser visibles y operables
+a través de la tecnología de asistencia, a menos que sea obvio
+que no son necesarios.
+— Cuando un elemento de usuario tiene un estado asociado
+con él, dicho estado también debe estar disponible para ser
+leído por tecnología de asistencia. Por ejemplo, si un botón
+de activación está en posición ‘on’, el lector de pantalla
+debe poder informar de ello. Los cambios de estado también
+deberán ser anunciados.
+— Asegura que los elementos a tocar en una pantalla táctil
+sean de un tamaño razonable para que todo el mundo pueda
+seleccionarlos fácilmente.
+Etiquetado
+— Todos los elementos (incluyendo elementos de formulario,
+botones, iconos y así sucesivamente) deben estar etiquetados
+visualmente y mediante programación con un nombre corto y
+descriptivo. La etiqueta debe ser adyacente al elemento con el
+que se relaciona.
+— Cada pantalla debe tener un nombre descriptivo único que se
+refiera a su contenido y ayude a la navegación.
+Accesibilidad 204
+Colores y Fuentes
+— Asegura que haya un buen contraste entre los colores de
+fondo y de primer plano. En particular, ten en cuenta los
+botones que incluyen texto. ¿El contraste entre el texto y
+el color de fondo cumple los requisitos de los estándares
+WCAG 2.0 o ISO 9241-171?
+— Evita utilizar el color como el único modo de diferenciar una acción. Un usuario daltónico no será capaz de
+identificar los errores si se le muestran en rojo los datos a
+corregir, por ejemplo.
+— Considera el tamaño de la fuente más pequeña. ¿Es razonable considerar que la mayoría de la gente podría leerla sin
+dificultad?
+Notificaciones
+— Los mensajes de error, las notificaciones y las alertas
+deben ser identificables y claros. Deberían ser anunciados
+por los lectores de pantalla y resultar claramente visibles,
+teniendo en cuenta que no deben desaparecer de la
+pantalla demasiado pronto.
+— Asegura que los mensajes de error, las notificaciones y
+las alertas no se transmiten solo mediante un color, un
+sonido o una señal táctil. Por ejemplo, una persona con
+pérdida auditiva no reconocerá notificaciones que solo son
+audibles.
+Accesibilidad 205
+Testeo
+— No te olvides de probar la aplicación en el dispositivo
+de destino con la tecnología de asistencia integrada en
+el sistema operativo utilizando algo más que la última
+versión del sistema operativo. Cuando se prueba en un
+dispositivo Android recuerda que a menos que el usuario
+tenga un dispositivo Android puro, como un Google Nexus,
+es poco probable que obtenga acceso a todas las actualizaciones más recientes del sistema operativo. Esto se
+debe a que para las actualizaciones del sistema operativo
+se está a merced del fabricante del teléfono, por lo que las
+versiones del sistema operativo Android ahí fuera pueden
+ser muy diversas. A veces puede haber interferencias en la
+forma en que las funciones de accesibilidad deben trabajar
+debido a que algunos fabricantes de teléfonos añaden
+una capa al sistema operativo. Por lo tanto siempre se
+recomienda que las pruebas de accesibilidad en Android
+se lleven a cabo en un dispositivo Google Nexus. De
+esta manera puedes estar seguro de que no hay nada
+que interfiera con la forma en que las características de
+accesibilidad deben trabajar y que estás trabajando con un
+denominador común.
+— ¡Asegúrate de que entre tus usuarios probadores haya
+también personas con discapacidad!
+Apple, Google y Microsoft han aumentado la importancia de
+sus respectivos soportes de accesibilidad haciendo que el uso
+de la interfaz de accesibilidad sirva para mejorar sus frameworks de automatización de pruebas de la interfaz gráfica de
+usuario. Esto supone otro incentivo más para que los desarrolladores consideren el diseño de sus aplicaciones para que sean
+más accesibles.
+206
+Mirando más detalladamente las diferentes plataformas
+móviles se hace evidente que difieren en gran medida con
+respecto a sus APIs, pero están comenzando a implementar
+muchas de las mismas características de accesibilidad.
+Controles y Elementos Personalizados
+Si estás utilizando elementos de interfaz de usuario personalizados en tu aplicación, las plataformas que tienen una API
+de accesibilidad te permiten hacer accesibles tus controles
+personalizados. Para ello, tienes que exponer el control a
+la tecnología de asistencia que se ejecuta en el dispositivo
+para que esta pueda consultar las propiedades del control y
+mostrarlo accesible.
+Puedes obtener más información sobre este proceso en
+Android en la presentación de Google I/O 20156 y la presentación de Google I/O 20137.
+El programa para desarrolladores de Apple también dispone
+de recursos útiles. Echa un vistazo a sus presentaciones en
+vídeo tratando temas de accesibilidad en las conferencias
+WWDC 2014 y 2015 disponibles en el iOS Developer Center8.
+Accesibilidad en Aplicaciones Android
+La última gran versión de Android, la versión 6 (Marshmallow),
+ha seguido mejorando el soporte a la accesibilidad mediante
+una nueva API de asistencia por voz creada aprovechando el
+trabajo previo del lector de pantalla Talkback. La accesibilidad
+6 youtube.com/watch?v=euEsfNR5Zw4
+7 youtube.com/watch?v=ld7kZRpMGb8
+8 developer.apple.com/wwdc/videos
+Accesibilidad 207
+comenzó a ser una propuesta real con Android 4.1 (Jellybean)
+y se ha mejorado mucho desde entonces.
+Algunas de las funciones de accesibilidad en Android
+incluyen cosas como las siguientes:
+— Voice Assistant (Talkback) - Salida de voz para usuarios
+ciegos.
+— Tamaño de fuente - Para usuarios con visión parcial y
+algunos usuarios con dificultades de aprendizaje.
+— Gestos de ampliación - Ampliación de tipo zoom para
+usuarios con deficiencia visual.
+— Colores negativos - Para usuarios con deficiencia visual
+y algunos usuarios con problemas de aprendizaje que
+prefieren una paleta de colores invertida.
+— Ajustes de color - Para usuarios con preferencias de color
+específicas.
+— Detector de sonido y alertas con flash - Para aquellos
+con deficiencia auditiva.
+— Subtítulos - Se proveen títulos o subtítulos para las
+personas con pérdida de audición.
+— Ajuste del auricular y audio mono - Para aquellos con
+pérdida de audición que utilizan auriculares.
+— Interruptor universal - Para las personas con discapacidades físicas que prefieren acceder a las aplicaciones
+usando un dispositivo de hardware.
+— Menú asistente - Para que aquellos con problemas de
+destreza puedan cambiar la velocidad y el tamaño del
+cursor o touchpad.
+— Retardo al tocar y presionar - Para usuarios con problemas motrices.
+Accesibilidad 208
+Encontrarás algunos recursos útiles en la Support Library9
+que también incluye maneras de mejorar la accesibilidad de las
+vistas personalizadas.
+Para obtener información específica sobre cómo utilizar la
+API de accesibilidad de Android, junto con mejores prácticas
+en accesibilidad en Android, consulta el documento de Google
+titulado Making Applications Accessible10.
+También puedes encontrar más ejemplos en la sección de
+aprendizaje de la documentación para desarrolladores, en
+una sección titulada Implementing Accessibility11. Testear la
+accesibilidad también está tratado en línea12.
+Accesibilidad en Aplicaciones BlackBerry
+Actualmente, el sistema operativo BlackBerry tiene algunas
+características de accesibilidad que son útiles para personas
+con diversas discapacidades. Las funcionalidades que ofrece
+son más limitadas, aunque sí que proporcionan soporte para
+TTY para personas con pérdida de audición. Como quiera que
+solo hay un lector de pantalla disponible para algunos de
+los dispositivos BlackBerry y no está tan desarrollado como
+VoiceOver para iOS o TalkBack para Android, los dispositivos
+BlackBerry están siendo tomados en cuenta por muy pocas
+personas invidentes a día de hoy. BlackBerry ha comenzado
+a moverse hacia el espacio Android con 'PRIV'. Dirígete a la
+sección Android para información sobre características de
+accesibilidad.
+9 developer.android.com/tools/support-library/index.html
+10 developer.android.com/guide/topics/ui/accessibility/apps.html
+11 developer.android.com/training/accessibility/index.html
+12 developer.android.com/tools/testing/testing_accessibility.html
+Accesibilidad 209
+El BlackBerry Screen Reader13 solamente está disponible
+para un número muy limitado de dispositivos BlackBerry Curve.
+Viene preinstalado en los dispositivos BlackBerry 10 y se puede
+descargar para otros dispositivos soportados. Puedes ver cuáles
+se soportan actualmente en el sitio web sobre accesibilidad de
+BlackBerry14.
+BlackBerry 10 ofrece varias configuraciones de accesibilidad
+para permitir a los usuarios personalizar su dispositivo. Estos
+incluyen, entre otros:
+— Lector de pantalla - Convierte texto en voz sintética
+para usuarios con poca o ninguna visión. Pero solo está
+disponible en el BlackBerry Z30.
+— Modo ampliar - Permite al usuario aumentar y disminuir la
+ampliación de texto y otros elementos en la pantalla.
+— Subtítulos - Son útiles en los vídeos para las personas con
+pérdida de audición.
+— Configuración de pantalla - Dan al usuario la oportunidad
+de cambiar el texto y los colores en la pantalla. Es útil para
+las personas con dificultades de aprendizaje y usuarios con
+visión parcial.
+— Configuración de TTY - Para usuarios con pérdida auditiva
+que quieren usar usar texto en lugar de voz para comunicarse.
+— Soporte a la escucha - Disponible en algunos teléfonos.
+Encontrarás documentación sobre la creación de aplicaciones
+13 mobileapps.blackberry.com/devicesoftware/entry.do?code=bsr
+14 us.blackberry.com/legal/accessibility.html
+Accesibilidad Accesibilidad 210
+accesibles para BlackBerry 10 en un artículo dedicado en el
+sitio web de BlackBerry.15
+Si estás diseñando para BlackBerry 10 también hay recursos
+de desarrollo que incluyen algunas directrices de diseño16.
+Accesibilidad en Aplicaciones iOS
+Apple fue la primera empresa que integró funciones de accesibilidad directamente en el sistema operativo. Debido a esto
+el soporte a la accesibilidad en iOS es un poco mejor que en
+Android, aunque Android se está acercando rápidamente.
+Algunas de las características de accesibilidad en iOS
+incluyen, entre otras:
+— VoiceOver - Lector de pantalla. Indica los objetos y textos
+que hay en la pantalla, habilitando tu aplicación para
+poder ser utilizada por personas invidentes.
+— Zoom - Amplía el contenido de la pantalla.
+— Invertir colores - Invierte los colores mostrados, ayudando
+a personas que necesitan contraste entre blancos y negros
+pero para los que una pantalla blanca es demasiado
+brillante.
+— Texto grande y en negrita - Ayuda a un amplio rango
+de personas, desde los que usan gafas a aquellos con
+ceguera parcial, pasando por los que tengas dificultades de
+aprendizaje.
+— Aumentar contraste - Mejora el contraste entre el fondo y
+el contenido.
+15 developer.blackberry.com/native/documentation/cascades/best_practices/
+accessibility/accessibility_features_best_practices.html
+16 developer.blackberry.com/devzone/design/bb10/accessibility.html
+Accesibilidad 211
+— Etiquetas y subtítulos - Para usuarios con dificultades
+auditivas.
+— Alertas audibles, visibles y táctiles - Permiten elegir qué
+tipo de alerta utilizar para las notificaciones.
+— Control por voz y Siri - Permite llamar por teléfono y usar
+ciertas funciones del teléfono mediante comandos de voz.
+Puede ser útil para muchos usuarios, por ejemplo aquellos
+con dificultades de motricidad, de aprendizaje, o de visión.
+— Soporte a audífonos - Para personas con pérdida de
+audición.
+— Control con interruptor - Para aquellos con discapacidades físicas que quieran utilizar hardware de terceros para
+usar la aplicación.
+— Acceso guiado - Útil en el ámbito educativo o cuando
+alguien quiere limitar qué es accesible desde la pantalla
+para un usuario.
+Si estás trabajando en iOS, asegúrate de seguir las directrices sobre accesibilidad de Apple17. Aportan información
+detallada sobre la API y son una excelente fuente de recomendaciones para maximizar la experiencia de usuario en tus
+aplicaciones.
+Apple también ofrece ayuda sobre cómo testear la accesibilidad de tu aplicación con Voiceover18.
+17 developer.apple.com/library/ios/documentation/UserExperience/Conceptual/
+iPhoneAccessibility/Introduction/Introduction.html
+18 developer.apple.com/library/ios/technotes/TestingAccessibilityOfiOSApps/
+TestAccessibilityonYourDevicewithVoiceOver/
+TestAccessibilityonYourDevicewithVoiceOver.html
+Accesibilidad 212
+Accesibilidad en Aplicaciones Windows
+Es justo decir que Microsoft ha estado poniéndose al día con
+iOS y Android en cuanto a accesibilidad. Desplegaron un buen
+soporte para la ampliación, el agrandamiento de texto y el
+cambio de colores, y en Windows Phone 8.1 las cosas siguieron
+adelante. En Windows Phone 8.1 existe un lector de pantalla
+llamado Narrator, que lee el texto en voz sintética y, al igual
+que otros lectores de pantalla del teléfono, hace uso de sus
+propios gestos específicos. Está diseñado para usuarios con
+poca o ninguna visión, pero todavía necesita mejorar para ser
+tan útil como sus contrapartidas en iOS y Android. Solo puede
+utilizarse con algunas funciones básicas y para la navegación y
+no tiene tantas funciones como otros lectores de pantalla. ¡Sin
+embargo, es sin duda prometedor!
+Algunas de las características de accesibilidad en Windows
+Phone 8.1 incluyen, entre otras:
+— Narrator - Lector de pantalla todavía en beta, con funcionalidad limitada y solo disponible para la versión 8.1.
+— Tamaño de texto - El tamaño del texto se puede ampliar
+para ayudar a las personas con dificultades visuales o de
+aprendizaje.
+— Modo alto contraste - Este modo cambia el texto a blanco
+y negro y proporciona un fondo de texto sólido en vez de
+a base de imágenes. Es útil para usuarios con deficiencia
+visual y/o dificultades de aprendizaje.
+Accesibilidad 213
+— Lupa de pantalla - Para las personas con deficiencia
+visual que deseen ampliar el texto en la pantalla y cambiar
+el nivel de zoom. Tiene sus propios gestos.
+— Control por voz - El usuario puede hacer llamadas, buscar
+en internet, abrir aplicaciones o escuchar mensajes de
+texto mediante control por voz. Útil para una amplia gama
+de personas en diferentes situaciones, incluyendo aquellas
+con deficiencias motrices, problemas de aprendizaje o
+discapacidad visual.
+— Personalizar etiquetas de navegador - Es posible cambiar
+el tamaño de fuente y el color y la transparencia del fondo
+de los subtítulos en Internet Explorer y en las aplicaciones
+que hacen uso del navegador. Útil para personas con
+pérdida auditiva o de visión.
+— Soporte a TTY - Permite a las personas con pérdida
+auditiva o del habla escribir mensajes a cualquier otra
+persona que tiene un TTY utilizando una línea de teléfono.
+— Cortana - Es el 'asistente personal' disponible solo en
+Windows Phone 8.1. Es una característica interesante para
+todos los usuarios, pero será de ayuda para las personas
+con discapacidades, ya que se puede activar con el habla.
+Accesibilidad 214
+Descubre más sobre accesibilidad en Windows Phone19
+incluyendo Narrator y otras características.
+La documentación "Accessibility for Windows Runtime
+Apps"20 proporciona ayuda, ya estés desarrollando en C#/VB/
+C++ y XAML o en JavaScript y HTML.
+Microsoft tiene sus Directrices para el Diseño de Aplicaciones Accesibles21 que es un documento realmente muy
+útil. Informa sobre la API correspondiente y, en el caso
+que tengas que utilizar controles personalizados en XAML o
+HTML, proporciona ayuda sobre cómo hacerlos de una manera
+accesible. También recoge algunas otras guías de terceros que
+pueden ser útiles. Por ejemplo, si estás desarrollando en HTML
+será importante considerar el uso de Accessible Rich Internet
+Applications 1.0 (WAI-ARIA)22, útil para hacer el contenido
+dinámico más accesible a los lectores de pantalla.
+Una vez que hayas testeado la accesibilidad de tu aplicación23, Microsoft te permitirá declarar que tu aplicación
+es accesible24 en la tienda de aplicaciones de Windows,
+permitiendo así que sea descubierta por aquellos que añadan el
+criterio de accesibilidad en sus búsquedas.
+19 windowsphone.com/en-gb/how-to/wp8/settings-and-personalization/
+accessibility-on-my-phone
+20 msdn.microsoft.com/en-us/library/windows/apps/xaml/dn263101.aspx
+21 msdn.microsoft.com/en-us/library/windows/apps/hh700407.aspx
+22 w3.org/TR/wai-aria/markup
+23 msdn.microsoft.com/en-us/library/windows/apps/xaml/hh994937.aspx
+24 msdn.microsoft.com/en-us/library/windows/apps/xaml/jj161016.aspx
+Accesibilidad 215
+Accesibilidad en Aplicaciones Móviles
+Web
+Como se ha mencionado anteriormente en este capítulo, se ha
+escrito mucho acerca de la accesibilidad web, pero se ha escrito
+menos sobre la accesibilidad en relación con las aplicaciones.
+Esto también se aplica a la accesibilidad de los sitios web
+móviles o de las aplicaciones móviles web (webapps). Se trata
+de un área que tiene un interés creciente y el World Wide Web
+Consortium (W3C) ha creado el 'Web and Mobile Interest Group'
+para discutirla e identificar qué tareas deben llevarse a cabo.
+El número de grupos de trabajo en el W3C que se relacionan
+con esta área está creciendo y pueden proporcionar ayuda y
+documentación útil.
+El W3C ha publicado un análisis sobre el estado de la
+cuestión y hoja de ruta que enumera los Estándares para
+Aplicaciones Web en Móviles25.
+El W3C ha sugerido que todo aquello que utilice HTML y esté
+basado en web debería atenerse a las Web Content Accessibility Guidelines (WCAG) 2.0 y a las Mobile Web Best Practices
+(MWBP). Así que estas directrices son un buen lugar para
+empezar si eres un desarrollador de contenidos web. También
+encontrarás que las Relationship between Mobile Web Best
+Practices (MWBP) and Web Content Accessibility Guidelines
+(WCAG)26 son un recurso útil.
+Si tu aplicación desea imitar el aspecto y usabilidad de una
+aplicación nativa, debes seguir las directrices mencionadas
+anteriormente en este capítulo.
+Como el HTML5 cada día está más soportado en las diferentes plataformas móviles, considera leer la guía de mejores
+25 w3.org/Mobile/mobile-web-app-state
+26 w3.org/TR/mwbp-wcag/
+Accesibilidad 216
+prácticas Mobile Web Application Best Practices27, ya que es
+probable que se utilicen para conformar las bases de cualquier
+norma futura de accesibilidad de aplicaciones web móviles. Otra
+área clave para orientarse es Accessible Rich Internet Applications 1.0 (WAI-ARIA)28, ya que ha sido diseñada para asegurar
+que las funciones de HTML más dinámicas sean accesibles para
+los lectores de pantalla.
+Un área interesante de trabajo en el W3C es el grupo
+Independent User Interface (IndieUI) Working Group29.
+El grupo afirma que "la interfaz de usuario independiente
+(IndieUI) es una forma de que las acciones del usuario sean
+comunicadas a las aplicaciones web y hará que sea más fácil
+para las aplicaciones web trabajar en una amplia gama de
+contextos: diferentes dispositivos, diferentes tecnologías de
+asistencia (AT), diferentes necesidades de los usuarios". Esta
+línea de trabajo va a ser muy importante para la accesibilidad
+y la independencia de los dispositivos. Merece la pena echar un
+vistazo a la documentación que tienen disponible actualmente.
